@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const  sequelize  = require('../config/database');
+const sequelize = require('../config/database');
 
 const Contribution = sequelize.define('Contribution', {
   id: {
@@ -15,7 +15,7 @@ const Contribution = sequelize.define('Contribution', {
     }
   },
   status: {
-    type: DataTypes.ENUM('pending', 'approved', 'completed', 'rejected'), // FIXED: Added 'approved'
+    type: DataTypes.ENUM('pending', 'approved', 'completed', 'rejected'),
     defaultValue: 'pending'
   },
   paymentMethod: {
@@ -33,11 +33,8 @@ const Contribution = sequelize.define('Contribution', {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'users',
-      key: 'id'
-    }
+    allowNull: false
+    // ✅ REMOVED the references - let associations handle it
   }
 }, {
   tableName: 'contributions'

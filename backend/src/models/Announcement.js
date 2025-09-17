@@ -2,21 +2,22 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Announcement = sequelize.define('Announcement', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
   title: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
   },
   content: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
   },
   priority: {
-    type: DataTypes.ENUM('low', 'normal', 'medium', 'high'),
+    type: DataTypes.ENUM('low', 'normal', 'high', 'urgent'),
     defaultValue: 'normal'
   },
   isVisible: {
@@ -27,21 +28,13 @@ const Announcement = sequelize.define('Announcement', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'users', // ✅ Changed from 'Users' to 'users'
       key: 'id'
     }
   }
 }, {
-  tableName: 'announcements',
-  timestamps: true
+  timestamps: true,
+  tableName: 'announcements' // Ensure this matches your actual table name
 });
-
-// Define associations
-Announcement.associate = function(models) {
-  Announcement.belongsTo(models.User, {
-    foreignKey: 'authorId',
-    as: 'author'
-  });
-};
 
 module.exports = Announcement;
