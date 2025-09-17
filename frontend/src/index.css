@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark mode styles */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .bg-surface {
+  background-color: #1e293b; /* slate-800 */
+}
+
+.dark .bg-surface-subtle {
+  background-color: #0f172a; /* slate-900 */
+}
+
+.dark .text-slate-800 {
+  color: #e2e8f0; /* slate-200 */
+}
+
+.dark .shadow-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
