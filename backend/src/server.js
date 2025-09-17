@@ -11,7 +11,7 @@ console.log('===========================');
 
 const express = require('express');
 const cors = require('cors');
-const { syncDatabase } = require('./models');
+const { syncDatabase, sequelize } = require('./models');
 const authRoutes = require('./routes/authRoutes');
 const contributionRoutes = require('./routes/contributions');
 const dashboardRoutes = require('./routes/dashboard');
@@ -28,7 +28,6 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
-
 app.use(express.json({ limit: '10mb' }));
 
 // Logging middleware
@@ -43,24 +42,21 @@ app.use('/api/contributions', contributionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/investments', investmentRoutes); // Add investment routes
+app.use('/api/investments', investmentRoutes);
 app.use('/api/announcements', announcementsRoutes);
 
-// Health check with database status
+// Health check
 app.get('/api/health', async (req, res) => {
   try {
-    // Test database connection
-    const db = require('./models');
-    await db.sequelize.authenticate();
-    
+    await sequelize.authenticate();
     res.json({ 
-      status: 'OK', 
+      status: 'OK',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       database: 'connected'
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'ERROR',
       error: 'Database connection failed',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -79,13 +75,13 @@ app.get('/', (req, res) => {
       dashboard: '/api/dashboard',
       health: '/api/health',
       settings: '/api/settings',
-      investments: '/api/investments' // Add investments endpoint
+      investments: '/api/investments'
     }
   });
 });
 
-// Error handling middleware
-const errorLogger = (err, req, res, next) => {
+// Error logging middleware
+app.use((err, req, res, next) => {
   console.error('❌ ERROR:', {
     timestamp: new Date().toISOString(),
     method: req.method,
@@ -94,13 +90,11 @@ const errorLogger = (err, req, res, next) => {
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
   next(err);
-};
-
-app.use(errorLogger);
+});
 
 // Final error handler
 app.use((err, req, res, next) => {
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Something went wrong!',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
@@ -108,14 +102,14 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Endpoint not found',
     path: req.path,
     method: req.method
   });
 });
 
-// Add error handling for unhandled rejections
+// Handle unhandled rejections and exceptions
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
@@ -129,8 +123,6 @@ process.on('uncaughtException', (error) => {
 const startServer = async () => {
   try {
     console.log('🔄 Syncing database...');
-    
-    // Sync database models (includes connection test and default settings creation)
     await syncDatabase();
     console.log('✅ Database synchronized successfully');
 
@@ -139,10 +131,9 @@ const startServer = async () => {
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📊 Database: ${process.env.DB_NAME}`);
       console.log(`🔗 Health: http://localhost:${PORT}/api/health`);
-      console.log(`🎯 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      console.log(`🎯 Frontend: ${process.env.FRONTEND_URL}`);
     });
 
-    // Graceful shutdown
     process.on('SIGINT', () => {
       console.log('\n🛑 Shutting down server gracefully...');
       server.close(() => {
