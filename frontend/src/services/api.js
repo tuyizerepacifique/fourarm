@@ -1,12 +1,17 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Use environment variable for API URL with fallbacks (Vite only)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+                     'https://fourarm-backend.onrender.com/api';
+
+console.log('API Base URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Add token to requests
@@ -31,8 +36,12 @@ api.interceptors.response.use(
       console.log('API 401 error - clearing auth data');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // Don't redirect here - let the components handle it
     }
+    
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - backend may be unavailable');
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -55,28 +64,13 @@ export const contributionsAPI = {
 };
 
 export const settingsAPI = {
-  // Get all settings
   getAll: () => api.get('/settings'),
-
-  // Get specific setting by key
   getByKey: (key) => api.get(`/settings/${key}`),
-
-  // Update a setting by key
   updateSetting: (key, data) => api.put(`/settings/${key}`, data),
-
-  // Update next meeting settings (special endpoint)
   updateNextMeeting: (data) => api.patch('/settings/next-meeting', data),
-
-  // Create a new setting
   createSetting: (data) => api.post('/settings', data),
-
-  // Delete a setting by key
   deleteSetting: (key) => api.delete(`/settings/${key}`),
-
-  // Alias for updateMeeting (backward compatibility)
   updateMeeting: (data) => api.patch('/settings/next-meeting', data),
-
-  // Notification preferences
   getNotificationPreferences: () => api.get('/settings/notifications'),
   updateNotificationPreferences: (data) => api.put('/settings/notifications', data),
 };
@@ -86,7 +80,6 @@ export const dashboardAPI = {
   getRecentActivity: () => api.get('/dashboard/activity'),
   getUpcomingEvents: () => api.get('/dashboard/events'),
   getDashboard: () => api.get('/dashboard'),
-  // Corrected: Added getDashboardData for backward compatibility
   getDashboardData: () => api.get('/dashboard'),
 };
 
@@ -97,61 +90,36 @@ export const adminAPI = {
   getUserStats: () => api.get('/admin/user-stats'),
 };
 
-// Investment API endpoints
 export const investmentAPI = {
-  // Get all investments
   getAll: () => api.get('/investments'),
-
-  // Get investment statistics
   getStats: () => api.get('/investments/stats'),
-
-  // Get specific investment
   getById: (id) => api.get(`/investments/${id}`),
-
-  // Create new investment
   create: (data) => api.post('/investments', data),
-
-  // Update investment
   update: (id, data) => api.put(`/investments/${id}`, data),
-
-  // Delete investment
   delete: (id) => api.delete(`/investments/${id}`),
-
-  // Update current value
   updateCurrentValue: (id, value) => api.patch(`/investments/${id}/current-value`, { currentValue: value }),
-
-  // Get investment proposals
   getProposals: () => api.get('/investments/proposals'),
-
-  // Create proposal
   createProposal: (data) => api.post('/investments/proposals', data),
-
-  // Vote on proposal
   voteOnProposal: (proposalId, vote) => api.post(`/investments/proposals/${proposalId}/vote`, { vote }),
-
-  // Get performance reports
   getReports: (period) => api.get(`/investments/reports?period=${period}`),
 };
 
-// Add to your services/api.js
 export const announcementsAPI = {
-  // Get all announcements
   getAll: () => api.get('/announcements'),
-
-  // Get specific announcement
   getById: (id) => api.get(`/announcements/${id}`),
-
-  // Create new announcement
   create: (data) => api.post('/announcements', data),
-
-  // Update announcement
   update: (id, data) => api.put(`/announcements/${id}`, data),
-
-  // Delete announcement
   delete: (id) => api.delete(`/announcements/${id}`),
-
-  // Update visibility
   updateVisibility: (id, data) => api.patch(`/announcements/${id}/visibility`, data),
+};
+
+export const testConnection = async () => {
+  try {
+    const response = await api.get('/health');
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 };
 
 export default api;
