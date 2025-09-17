@@ -109,7 +109,6 @@ app.use((req, res) => {
   });
 });
 
-// Handle unhandled rejections and exceptions
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });

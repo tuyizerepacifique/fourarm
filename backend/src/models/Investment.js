@@ -1,7 +1,12 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // ✅ Imports the instance directly
+const sequelize = require('../config/database');
 
 const Investment = sequelize.define('Investment', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -60,31 +65,25 @@ const Investment = sequelize.define('Investment', {
   },
   createdBy: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
+    allowNull: true
   }
 }, {
   timestamps: true,
   hooks: {
     beforeCreate: (investment) => {
-      // Set currentValue to amountInvested initially
       if (!investment.currentValue || investment.currentValue === 0) {
         investment.currentValue = investment.amountInvested;
       }
-      // Calculate initial ROI (0%)
       investment.roi = 0;
     },
     beforeUpdate: (investment) => {
-      // Auto-calculate ROI when currentValue changes
       if (investment.changed('currentValue') && investment.amountInvested > 0) {
         const gain = investment.currentValue - investment.amountInvested;
         investment.roi = (gain / investment.amountInvested) * 100;
       }
     }
-  }
+  },
+  tableName: 'investments' // ✅ Changed to match your actual table name
 });
 
 module.exports = Investment;

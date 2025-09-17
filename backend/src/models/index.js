@@ -6,101 +6,72 @@ const Investment = require('./Investment');
 const Announcement = require('./Announcement');
 
 // Define associations
-User.hasMany(Contribution, { 
-  foreignKey: 'userId', 
-  as: 'contributions',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE'
-});
+const defineAssociations = () => {
+  User.hasMany(Contribution, { 
+    foreignKey: 'userId', 
+    as: 'contributions',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
 
-Contribution.belongsTo(User, { 
-  foreignKey: 'userId', 
-  as: 'user',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE'
-});
+  Contribution.belongsTo(User, { 
+    foreignKey: 'userId', 
+    as: 'user',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
 
-// Association between User and Investment
-User.hasMany(Investment, {
-  foreignKey: 'createdBy',
-  as: 'investments',
-  onDelete: 'SET NULL',
-  onUpdate: 'CASCADE'
-});
+  // Association between User and Investment
+  User.hasMany(Investment, {
+    foreignKey: 'createdBy',
+    as: 'investments',
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE'
+  });
 
-Investment.belongsTo(User, {
-  foreignKey: 'createdBy',
-  as: 'creator'
-});
+  Investment.belongsTo(User, {
+    foreignKey: 'createdBy',
+    as: 'creator'
+  });
 
-// Association between User and Announcement
-User.hasMany(Announcement, {
-  foreignKey: 'authorId',
-  as: 'announcements',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE'
-});
+  // Association between User and Announcement
+  User.hasMany(Announcement, {
+    foreignKey: 'authorId',
+    as: 'announcements',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+  });
 
-Announcement.belongsTo(User, {
-  foreignKey: 'authorId',
-  as: 'author'
-});
+  Announcement.belongsTo(User, {
+    foreignKey: 'authorId',
+    as: 'author'
+  });
+};
 
 const syncDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
     
-    // Use environment variable to control force sync
-    const shouldForceSync = process.env.FORCE_SYNC === 'true';
+    // Define associations before syncing
+    defineAssociations();
     
-    console.log(`🔄 Sync mode: ${shouldForceSync ? 'FORCE (drop & recreate)' : 'ALTER (modify existing)'}`);
+    // Use safe sync mode (no force, no alter) to avoid modifying existing tables
+    console.log('🔄 Sync mode: SAFE (no schema modifications)');
     
     await sequelize.sync({ 
-      force: shouldForceSync,
-      alter: !shouldForceSync // Don't alter when forcing sync
+      force: false,    // ✅ Don't drop tables
+      alter: false     // ✅ Don't modify existing tables
     });
     
     console.log('✅ Database models synchronized successfully.');
 
     await createDefaultSettings();
     
-    // If we forced sync, create a default admin user
-    if (shouldForceSync) {
-      await createDefaultAdmin();
-    }
-    
   } catch (error) {
     console.error('❌ Database error:', error.message);
-    
-    // If sync fails with key error, try a more conservative approach
-    if (error.original?.code === 'ER_TOO_MANY_KEYS') {
-      console.log('🔄 Too many keys error detected. Trying safe sync...');
-      await safeSync();
-    } else {
-      console.error('❌ Full error details:', error);
-      throw error; // Re-throw for server to handle
-    }
-  }
-};
-
-// Safe sync method for key errors
-const safeSync = async () => {
-  try {
-    // First try without alter
-    await sequelize.sync({ force: false, alter: false });
-    console.log('✅ Database models synchronized (safe mode).');
-  } catch (safeError) {
-    console.error('❌ Safe sync also failed:', safeError.message);
-    
-    // If safe sync fails, try force sync as last resort
-    console.log('🔄 Attempting force sync as last resort...');
-    await sequelize.sync({ force: true, alter: false });
-    console.log('✅ Database models synchronized (force mode).');
-    
-    // Recreate default data
-    await createDefaultSettings();
-    await createDefaultAdmin();
+    console.error('❌ Full error details:', error);
+    throw error;
   }
 };
 
@@ -138,7 +109,7 @@ const createDefaultAdmin = async () => {
         firstName: 'Family',
         lastName: 'Admin',
         email: 'admin@family.com',
-        password: 'admin123', // Will be hashed by the hook
+        password: 'admin123',
         role: 'admin',
         status: 'active'
       });
@@ -156,5 +127,6 @@ module.exports = {
   Settings,
   Investment,
   Announcement,
-  syncDatabase
+  syncDatabase,
+  defineAssociations
 };

@@ -1,6 +1,5 @@
-// backend/src/models/User.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // ✅ Correct import
+const sequelize = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 const User = sequelize.define('User', {
@@ -60,7 +59,7 @@ const User = sequelize.define('User', {
       }
     }
   },
-  tableName: 'users'
+  tableName: 'users' // ✅ Changed to match your actual table name
 });
 
 // Instance method to validate password
