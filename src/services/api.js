@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Use environment variable for API URL with fallbacks (Vite only)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
-                     'https://fourarm-backend.onrender.com';
+                     'https://fourarm-backend.onrender.com/api';
 
 console.log('API Base URL:', API_BASE_URL);
 
@@ -47,82 +47,83 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  // Add /api prefix to every API call
-  login: (loginData) => api.post('/api/auth/login', loginData),
-  register: (userData) => api.post('/api/auth/register', userData),
-  verifyToken: () => api.get('/api/auth/verify'),
-  getProfile: () => api.get('/api/auth/profile'),
-  updateProfile: (profileData) => api.put('/api/auth/profile', profileData),
-  changePassword: (passwordData) => api.post('/api/auth/change-password', passwordData),
+  // Corrected path
+  login: (loginData) => api.post('/auth/login', loginData),
+  register: (userData) => api.post('/auth/register', userData),
+  verifyToken: () => api.get('/auth/verify'),
+  getProfile: () => api.get('/auth/profile'),
+  updateProfile: (profileData) => api.put('/auth/profile', profileData),
+  changePassword: (passwordData) => api.post('/auth/change-password', passwordData),
 };
 
 export const contributionsAPI = {
-  // Add /api prefix to every API call
-  getAll: () => api.get('/api/contributions'),
-  create: (data) => api.post('/api/contributions', data),
-  getMyContributions: () => api.get('/api/contributions/my-contributions'),
-  updateStatus: (id, status) => api.patch(`/api/contributions/${id}/status`, { status }),
-  delete: (id) => api.delete(`/api/contributions/${id}`),
+  // Corrected path
+  getAll: () => api.get('/contributions'),
+  create: (data) => api.post('/contributions', data),
+  getMyContributions: () => api.get('/contributions/my-contributions'),
+  updateStatus: (id, status) => api.patch(`/contributions/${id}/status`, { status }),
+  delete: (id) => api.delete(`/contributions/${id}`),
 };
 
 export const settingsAPI = {
-  // Add /api prefix to every API call
-  getAll: () => api.get('/api/settings'),
-  getByKey: (key) => api.get(`/api/settings/${key}`),
-  updateSetting: (key, data) => api.put(`/api/settings/${key}`, data),
-  updateNextMeeting: (data) => api.patch('/api/settings/next-meeting', data),
-  createSetting: (data) => api.post('/api/settings', data),
-  deleteSetting: (key) => api.delete(`/api/settings/${key}`),
-  updateMeeting: (data) => api.patch('/api/settings/next-meeting', data),
-  getNotificationPreferences: () => api.get('/api/settings/notifications'),
-  updateNotificationPreferences: (data) => api.put('/api/settings/notifications', data),
+  // Corrected path
+  getAll: () => api.get('/settings'),
+  getByKey: (key) => api.get(`/settings/${key}`),
+  updateSetting: (key, data) => api.put(`/settings/${key}`, data),
+  updateNextMeeting: (data) => api.patch('/settings/next-meeting', data),
+  createSetting: (data) => api.post('/settings', data),
+  deleteSetting: (key) => api.delete(`/settings/${key}`),
+  updateMeeting: (data) => api.patch('/settings/next-meeting', data),
+  getNotificationPreferences: () => api.get('/settings/notifications'),
+  updateNotificationPreferences: (data) => api.put('/settings/notifications', data),
 };
 
 export const dashboardAPI = {
-  // Add /api prefix to every API call
-  getStats: () => api.get('/api/dashboard/stats'),
-  getRecentActivity: () => api.get('/api/dashboard/activity'),
-  getUpcomingEvents: () => api.get('/api/dashboard/events'),
-  getDashboard: () => api.get('/api/dashboard'),
-  getDashboardData: () => api.get('/api/dashboard'),
+  // Corrected path
+  getStats: () => api.get('/dashboard/stats'),
+  getRecentActivity: () => api.get('/dashboard/activity'),
+  getUpcomingEvents: () => api.get('/dashboard/events'),
+  getDashboard: () => api.get('/dashboard'),
+  getDashboardData: () => api.get('/dashboard'),
 };
 
 export const adminAPI = {
-  // Add /api prefix to every API call
-  getUsers: () => api.get('/api/admin/users'),
-  updateUserRole: (userId, role) => api.patch(`/api/admin/users/${userId}/role`, { role }),
-  deleteUser: (userId) => api.delete(`/api/admin/users/${userId}`),
-  getUserStats: () => api.get('/api/admin/user-stats'),
+  // Corrected path
+  getUsers: () => api.get('/admin/users'),
+  updateUserRole: (userId, role) => api.patch(`/admin/users/${userId}/role`, { role }),
+  deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
+  getUserStats: () => api.get('/admin/user-stats'),
 };
 
 export const investmentAPI = {
-  // Add /api prefix to every API call
-  getAll: () => api.get('/api/investments'),
-  getStats: () => api.get('/api/investments/stats'),
-  getById: (id) => api.get(`/api/investments/${id}`),
-  create: (data) => api.post('/api/investments', data),
-  update: (id, data) => api.put(`/api/investments/${id}`, data),
-  delete: (id) => api.delete(`/api/investments/${id}`),
-  updateCurrentValue: (id, value) => api.patch(`/api/investments/${id}/current-value`, { currentValue: value }),
-  getProposals: () => api.get('/api/investments/proposals'),
-  createProposal: (data) => api.post('/api/investments/proposals', data),
-  voteOnProposal: (proposalId, vote) => api.post(`/api/investments/proposals/${proposalId}/vote`, { vote }),
-  getReports: (period) => api.get(`/api/investments/reports?period=${period}`),
+  // Corrected path
+  getAll: () => api.get('/investments'),
+  getStats: () => api.get('/investments/stats'),
+  getById: (id) => api.get(`/investments/${id}`),
+  create: (data) => api.post('/investments', data),
+  update: (id, data) => api.put(`/investments/${id}`, data),
+  delete: (id) => api.delete(`/investments/${id}`),
+  updateCurrentValue: (id, value) => api.patch(`/investments/${id}/current-value`, { currentValue: value }),
+  getProposals: () => api.get('/investments/proposals'),
+  createProposal: (data) => api.post('/investments/proposals', data),
+  voteOnProposal: (proposalId, vote) => api.post(`/investments/proposals/${proposalId}/vote`, { vote }),
+  getReports: (period) => api.get(`/investments/reports?period=${period}`),
 };
 
 export const announcementsAPI = {
-  // Add /api prefix to every API call
-  getAll: () => api.get('/api/announcements'),
-  getById: (id) => api.get(`/api/announcements/${id}`),
-  create: (data) => api.post('/api/announcements', data),
-  update: (id, data) => api.put(`/api/announcements/${id}`, data),
-  delete: (id) => api.delete(`/api/announcements/${id}`),
-  updateVisibility: (id, data) => api.patch(`/api/announcements/${id}/visibility`, data),
+  // Corrected path
+  getAll: () => api.get('/announcements'),
+  getById: (id) => api.get(`/announcements/${id}`),
+  create: (data) => api.post('/announcements', data),
+  update: (id, data) => api.put(`/announcements/${id}`, data),
+  delete: (id) => api.delete(`/announcements/${id}`),
+  updateVisibility: (id, data) => api.patch(`/announcements/${id}/visibility`, data),
 };
 
 export const testConnection = async () => {
   try {
-    const response = await api.get('/api/health');
+    // Corrected path
+    const response = await api.get('/health');
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, error: error.message };
