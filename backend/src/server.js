@@ -1,4 +1,4 @@
-// server.js - COMPLETE UPDATED VERSION WITH ALL FIXES
+// server.js - COMPLETE UPDATED VERSION WITH /api PREFIX
 
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
@@ -25,7 +25,7 @@ const announcementsRoutes = require('./routes/announcements');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS Configuration - SIMPLIFIED AND GUARANTEED TO WORK
+// CORS Configuration
 const allowedOrigins = [
   'https://frontend-hzf0mal3u-idiom.vercel.app',
   'https://fourarm-frontend.vercel.app',
@@ -71,17 +71,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ ROUTES MOUNTED WITHOUT /api PREFIX (to avoid duplicate /api/api/)
-app.use('/auth', authRoutes);
-app.use('/contributions', contributionRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/admin', adminRoutes);
-app.use('/settings', settingsRoutes);
-app.use('/investments', investmentRoutes);
-app.use('/announcements', announcementsRoutes);
+// ✅ ROUTES MOUNTED WITH /api PREFIX (for frontend compatibility)
+app.use('/api/auth', authRoutes);
+app.use('/api/contributions', contributionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/investments', investmentRoutes);
+app.use('/api/announcements', announcementsRoutes);
 
-// ✅ HEALTH CHECK ENDPOINT
-app.get('/health', async (req, res) => {
+// ✅ HEALTH CHECK ENDPOINT WITH /api PREFIX
+app.get('/api/health', async (req, res) => {
   try {
     await sequelize.authenticate();
     res.json({ 
@@ -103,8 +103,8 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// ✅ CORS TEST ENDPOINT (NEW)
-app.get('/cors-test', (req, res) => {
+// ✅ CORS TEST ENDPOINT WITH /api PREFIX
+app.get('/api/cors-test', (req, res) => {
   res.json({
     message: 'CORS test successful!',
     origin: req.headers.origin,
@@ -114,42 +114,43 @@ app.get('/cors-test', (req, res) => {
   });
 });
 
-// ✅ API TEST ENDPOINT (for frontend testing)
-app.get('/api-test', (req, res) => {
+// ✅ API TEST ENDPOINT WITH /api PREFIX
+app.get('/api/api-test', (req, res) => {
   res.json({
     message: 'API test successful!',
     frontendBase: 'https://fourarm-backend.onrender.com/api',
-    backendRoutes: '/auth, /contributions, /admin, etc.',
+    backendRoutes: '/api/auth, /api/contributions, /api/admin, etc.',
     note: 'Frontend should use: https://fourarm-backend.onrender.com/api + endpoint',
     example: 'https://fourarm-backend.onrender.com/api/auth/login'
   });
 });
 
-// ✅ ROOT ENDPOINT WITH CORRECTED PATHS
+// ✅ ROOT ENDPOINT WITH UPDATED PATHS
 app.get('/', (req, res) => {
   res.json({
-    message: '4Arms Family Backend API - DEPLOYED WITH FIXES',
+    message: '4Arms Family Backend API - WITH API PREFIX',
     version: '2.0.0',
     environment: process.env.NODE_ENV || 'development',
-    status: '🟢 RUNNING WITH CORS FIXES',
+    status: '🟢 RUNNING WITH API PREFIX',
     endpoints: {
-      auth: '/auth',
-      contributions: '/contributions',
-      dashboard: '/dashboard',
-      health: '/health',
-      settings: '/settings',
-      investments: '/investments',
-      announcements: '/announcements',
-      admin: '/admin',
-      corsTest: '/cors-test',
-      apiTest: '/api-test'
+      auth: '/api/auth',
+      contributions: '/api/contributions',
+      dashboard: '/api/dashboard',
+      health: '/api/health',
+      settings: '/api/settings',
+      investments: '/api/investments',
+      announcements: '/api/announcements',
+      admin: '/api/admin',
+      corsTest: '/api/cors-test',
+      apiTest: '/api/api-test'
     },
     frontendUsage: {
       baseURL: 'https://fourarm-backend.onrender.com/api',
       examples: {
         login: 'https://fourarm-backend.onrender.com/api/auth/login',
         users: 'https://fourarm-backend.onrender.com/api/admin/users',
-        contributions: 'https://fourarm-backend.onrender.com/api/contributions'
+        contributions: 'https://fourarm-backend.onrender.com/api/contributions',
+        health: 'https://fourarm-backend.onrender.com/api/health'
       }
     },
     cors: {
@@ -205,14 +206,14 @@ app.use((req, res) => {
     path: req.path,
     method: req.method,
     availableEndpoints: {
-      auth: '/auth',
-      contributions: '/contributions',
-      dashboard: '/dashboard',
-      health: '/health',
-      settings: '/settings',
-      admin: '/admin',
-      corsTest: '/cors-test',
-      apiTest: '/api-test'
+      auth: '/api/auth',
+      contributions: '/api/contributions',
+      dashboard: '/api/dashboard',
+      health: '/api/health',
+      settings: '/api/settings',
+      admin: '/api/admin',
+      corsTest: '/api/cors-test',
+      apiTest: '/api/api-test'
     },
     frontendUsage: 'Use: https://fourarm-backend.onrender.com/api + endpoint'
   });
@@ -238,18 +239,18 @@ const startServer = async () => {
       console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📊 Database: ${process.env.DB_NAME}`);
-      console.log(`🔗 Health: http://localhost:${PORT}/health`);
-      console.log(`🔗 CORS Test: http://localhost:${PORT}/cors-test`);
-      console.log(`🔗 API Test: http://localhost:${PORT}/api-test`);
+      console.log(`🔗 Health: https://fourarm-backend.onrender.com/api/health`);
+      console.log(`🔗 CORS Test: https://fourarm-backend.onrender.com/api/cors-test`);
+      console.log(`🔗 API Test: https://fourarm-backend.onrender.com/api/api-test`);
       console.log(`🎯 Allowed Frontends: ${allowedOrigins.join(', ')}`);
       console.log('\n📋 Available endpoints:');
-      console.log('   Auth: /auth');
-      console.log('   Contributions: /contributions');
-      console.log('   Admin: /admin');
-      console.log('   Dashboard: /dashboard');
-      console.log('   Health: /health');
-      console.log('   CORS Test: /cors-test');
-      console.log('   API Test: /api-test');
+      console.log('   Auth: /api/auth');
+      console.log('   Contributions: /api/contributions');
+      console.log('   Admin: /api/admin');
+      console.log('   Dashboard: /api/dashboard');
+      console.log('   Health: /api/health');
+      console.log('   CORS Test: /api/cors-test');
+      console.log('   API Test: /api/api-test');
       console.log('\n🎯 Frontend should use:');
       console.log('   Base URL: https://fourarm-backend.onrender.com/api');
       console.log('   Example: https://fourarm-backend.onrender.com/api/auth/login');
