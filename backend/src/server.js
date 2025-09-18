@@ -1,3 +1,5 @@
+// server.js - COMPLETE UPDATED VERSION
+
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
@@ -23,31 +25,55 @@ const announcementsRoutes = require('./routes/announcements');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Correct CORS origin from a single URL to a comma-separated list
-const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [];
+// CORS Configuration - UPDATED
+const allowedOrigins = [
+  'https://frontend-hzf0mal3u-idiom.vercel.app', // Your Vercel frontend
+  'https://fourarm-frontend.vercel.app',         // Your main domain
+  'http://localhost:3000',                       // Local development
+  'http://localhost:5173',                       // Vite development
+  'https://fourarm-frontend.vercel.app',         // Alternative Vercel domain
+];
 
-// Middleware
+// Add FRONTEND_URL from environment if it exists
+if (process.env.FRONTEND_URL) {
+  const envOrigins = process.env.FRONTEND_URL.split(',');
+  allowedOrigins.push(...envOrigins);
+}
+
+console.log('Allowed CORS origins:', allowedOrigins);
+
+// Middleware - UPDATED CORS CONFIG
 app.use(cors({
-  origin: (origin, callback) => {
-    // allow requests with no origin (like mobile apps or curl requests)
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-      return callback(new Error(msg), false);
+    
+    // Check if the origin is in the allowed list
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked for origin:', origin);
+      callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
     }
-    return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
+
+// Handle preflight requests for all routes - CRUCIAL FOR CORS
+app.options('*', cors());
+
 app.use(express.json({ limit: '10mb' }));
 
 // Logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
   next();
 });
 
-// ✅ UPDATED: Routes mounted without /api prefix
+// ✅ UPDATED: Routes mounted without /api prefix (to avoid duplicate /api/api/)
 app.use('/auth', authRoutes);
 app.use('/contributions', contributionRoutes);
 app.use('/dashboard', dashboardRoutes);
@@ -64,7 +90,11 @@ app.get('/health', async (req, res) => {
       status: 'OK',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
-      database: 'connected'
+      database: 'connected',
+      cors: {
+        allowedOrigins: allowedOrigins,
+        currentOrigin: req.headers.origin || 'none'
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -75,11 +105,22 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Test CORS endpoint
+app.get('/cors-test', (req, res) => {
+  res.json({
+    message: 'CORS test successful!',
+    origin: req.headers.origin,
+    allowedOrigins: allowedOrigins,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // ✅ UPDATED: Root endpoint with corrected paths
 app.get('/', (req, res) => {
   res.json({
     message: '4Arms Family Backend API',
     version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
     endpoints: {
       auth: '/auth',
       contributions: '/contributions',
@@ -88,14 +129,37 @@ app.get('/', (req, res) => {
       settings: '/settings',
       investments: '/investments',
       announcements: '/announcements',
-      admin: '/admin'
+      admin: '/admin',
+      corsTest: '/cors-test'
+    },
+    cors: {
+      allowedOrigins: allowedOrigins,
+      currentOrigin: req.headers.origin || 'none'
     }
   });
 });
 
 // Error logging middleware
 app.use((err, req, res, next) => {
-  console.error('❌ ERROR:', {
+  if (err.message.includes('CORS')) {
+    console.error('❌ CORS ERROR:', {
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      origin: req.headers.origin,
+      error: err.message,
+      allowedOrigins: allowedOrigins
+    });
+    
+    return res.status(403).json({
+      error: 'CORS blocked',
+      message: 'Request origin not allowed',
+      allowedOrigins: allowedOrigins,
+      yourOrigin: req.headers.origin
+    });
+  }
+  
+  console.error('❌ GENERAL ERROR:', {
     timestamp: new Date().toISOString(),
     method: req.method,
     path: req.path,
@@ -118,7 +182,15 @@ app.use((req, res) => {
   res.status(404).json({
     error: 'Endpoint not found',
     path: req.path,
-    method: req.method
+    method: req.method,
+    availableEndpoints: {
+      auth: '/auth',
+      contributions: '/contributions',
+      dashboard: '/dashboard',
+      health: '/health',
+      settings: '/settings',
+      admin: '/admin'
+    }
   });
 });
 
@@ -143,13 +215,15 @@ const startServer = async () => {
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📊 Database: ${process.env.DB_NAME}`);
       console.log(`🔗 Health: http://localhost:${PORT}/health`);
-      console.log(`🎯 Frontend: ${process.env.FRONTEND_URL}`);
+      console.log(`🔗 CORS Test: http://localhost:${PORT}/cors-test`);
+      console.log(`🎯 Allowed Frontends: ${allowedOrigins.join(', ')}`);
       console.log('\n📋 Available endpoints:');
       console.log('   Auth: /auth');
       console.log('   Contributions: /contributions');
       console.log('   Admin: /admin');
       console.log('   Dashboard: /dashboard');
       console.log('   Health: /health');
+      console.log('   CORS Test: /cors-test');
     });
 
     process.on('SIGINT', () => {
