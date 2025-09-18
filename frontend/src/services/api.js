@@ -47,6 +47,7 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
+  // ✅ CORRECT: No duplicate /api prefix
   login: (loginData) => api.post('/auth/login', loginData),
   register: (userData) => api.post('/auth/register', userData),
   verifyToken: () => api.get('/auth/verify'),
@@ -56,6 +57,7 @@ export const authAPI = {
 };
 
 export const contributionsAPI = {
+  // ✅ CORRECT: No duplicate /api prefix
   getAll: () => api.get('/contributions'),
   create: (data) => api.post('/contributions', data),
   getMyContributions: () => api.get('/contributions/my-contributions'),
@@ -64,6 +66,7 @@ export const contributionsAPI = {
 };
 
 export const settingsAPI = {
+  // ✅ CORRECT: No duplicate /api prefix
   getAll: () => api.get('/settings'),
   getByKey: (key) => api.get(`/settings/${key}`),
   updateSetting: (key, data) => api.put(`/settings/${key}`, data),
@@ -76,6 +79,7 @@ export const settingsAPI = {
 };
 
 export const dashboardAPI = {
+  // ✅ CORRECT: No duplicate /api prefix
   getStats: () => api.get('/dashboard/stats'),
   getRecentActivity: () => api.get('/dashboard/activity'),
   getUpcomingEvents: () => api.get('/dashboard/events'),
@@ -84,6 +88,7 @@ export const dashboardAPI = {
 };
 
 export const adminAPI = {
+  // ✅ CORRECT: No duplicate /api prefix
   getUsers: () => api.get('/admin/users'),
   updateUserRole: (userId, role) => api.patch(`/admin/users/${userId}/role`, { role }),
   deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
@@ -91,6 +96,7 @@ export const adminAPI = {
 };
 
 export const investmentAPI = {
+  // ✅ CORRECT: No duplicate /api prefix
   getAll: () => api.get('/investments'),
   getStats: () => api.get('/investments/stats'),
   getById: (id) => api.get(`/investments/${id}`),
@@ -105,6 +111,7 @@ export const investmentAPI = {
 };
 
 export const announcementsAPI = {
+  // ✅ CORRECT: No duplicate /api prefix
   getAll: () => api.get('/announcements'),
   getById: (id) => api.get(`/announcements/${id}`),
   create: (data) => api.post('/announcements', data),
@@ -115,6 +122,7 @@ export const announcementsAPI = {
 
 export const testConnection = async () => {
   try {
+    // ✅ CORRECT: No duplicate /api prefix
     const response = await api.get('/health');
     return { success: true, data: response.data };
   } catch (error) {

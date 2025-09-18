@@ -62,7 +62,8 @@ function UserManagement() {
 
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+      // FIXED: Removed duplicate /api prefix
+      const response = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -135,7 +136,8 @@ function UserManagement() {
       const token = localStorage.getItem('token');
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+      // FIXED: Removed duplicate /api prefix
+      const response = await fetch(`${API_BASE_URL}/admin/users`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -190,7 +192,8 @@ function UserManagement() {
       const token = localStorage.getItem('token');
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/${editingUser.id}`, {
+      // FIXED: Removed duplicate /api prefix
+      const response = await fetch(`${API_BASE_URL}/admin/users/${editingUser.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -222,7 +225,8 @@ function UserManagement() {
       const token = localStorage.getItem('token');
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userToDelete.id}`, {
+      // FIXED: Removed duplicate /api prefix
+      const response = await fetch(`${API_BASE_URL}/admin/users/${userToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -79,7 +79,7 @@ function Contributions() {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
       // For admin, get all contributions. For regular users, get their own
-      const endpoint = isAdmin ? '/api/contributions' : '/api/contributions/my';
+      const endpoint = isAdmin ? '/contributions' : '/contributions/my';
       
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         headers: {
@@ -146,7 +146,7 @@ function Contributions() {
       const token = localStorage.getItem('token');
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(`${API_BASE_URL}/api/contributions`, {
+      const response = await fetch(`${API_BASE_URL}/contributions`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -190,7 +190,7 @@ function Contributions() {
       const token = localStorage.getItem('token');
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(`${API_BASE_URL}/api/contributions/${contributionId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/contributions/${contributionId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -231,7 +231,7 @@ function Contributions() {
       const token = localStorage.getItem('token');
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await fetch(`${API_BASE_URL}/api/contributions/${contributionToDelete.id}`, {
+      const response = await fetch(`${API_BASE_URL}/contributions/${contributionToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
