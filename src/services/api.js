@@ -2,124 +2,131 @@ import axios from 'axios';
 
 // Use environment variable for API URL with fallbacks (Vite only)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
-                     'https://fourarm-backend.onrender.com/api';
+                     'https://fourarm-backend.onrender.com';
 
 console.log('API Base URL:', API_BASE_URL);
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
 });
 
 // Add token to requests
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 // Handle auth errors
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      console.log('API 401 error - clearing auth data');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
-    
-    if (error.code === 'ERR_NETWORK') {
-      console.error('Network error - backend may be unavailable');
-    }
-    
-    return Promise.reject(error);
-  }
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log('API 401 error - clearing auth data');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - backend may be unavailable');
+    }
+    
+    return Promise.reject(error);
+  }
 );
 
 export const authAPI = {
-  login: (loginData) => api.post('/auth/login', loginData),
-  register: (userData) => api.post('/auth/register', userData),
-  verifyToken: () => api.get('/auth/verify'),
-  getProfile: () => api.get('/auth/profile'),
-  updateProfile: (profileData) => api.put('/auth/profile', profileData),
-  changePassword: (passwordData) => api.post('/auth/change-password', passwordData),
+  // Add /api prefix to every API call
+  login: (loginData) => api.post('/api/auth/login', loginData),
+  register: (userData) => api.post('/api/auth/register', userData),
+  verifyToken: () => api.get('/api/auth/verify'),
+  getProfile: () => api.get('/api/auth/profile'),
+  updateProfile: (profileData) => api.put('/api/auth/profile', profileData),
+  changePassword: (passwordData) => api.post('/api/auth/change-password', passwordData),
 };
 
 export const contributionsAPI = {
-  getAll: () => api.get('/contributions'),
-  create: (data) => api.post('/contributions', data),
-  getMyContributions: () => api.get('/contributions/my-contributions'),
-  updateStatus: (id, status) => api.patch(`/contributions/${id}/status`, { status }),
-  delete: (id) => api.delete(`/contributions/${id}`),
+  // Add /api prefix to every API call
+  getAll: () => api.get('/api/contributions'),
+  create: (data) => api.post('/api/contributions', data),
+  getMyContributions: () => api.get('/api/contributions/my-contributions'),
+  updateStatus: (id, status) => api.patch(`/api/contributions/${id}/status`, { status }),
+  delete: (id) => api.delete(`/api/contributions/${id}`),
 };
 
 export const settingsAPI = {
-  getAll: () => api.get('/settings'),
-  getByKey: (key) => api.get(`/settings/${key}`),
-  updateSetting: (key, data) => api.put(`/settings/${key}`, data),
-  updateNextMeeting: (data) => api.patch('/settings/next-meeting', data),
-  createSetting: (data) => api.post('/settings', data),
-  deleteSetting: (key) => api.delete(`/settings/${key}`),
-  updateMeeting: (data) => api.patch('/settings/next-meeting', data),
-  getNotificationPreferences: () => api.get('/settings/notifications'),
-  updateNotificationPreferences: (data) => api.put('/settings/notifications', data),
+  // Add /api prefix to every API call
+  getAll: () => api.get('/api/settings'),
+  getByKey: (key) => api.get(`/api/settings/${key}`),
+  updateSetting: (key, data) => api.put(`/api/settings/${key}`, data),
+  updateNextMeeting: (data) => api.patch('/api/settings/next-meeting', data),
+  createSetting: (data) => api.post('/api/settings', data),
+  deleteSetting: (key) => api.delete(`/api/settings/${key}`),
+  updateMeeting: (data) => api.patch('/api/settings/next-meeting', data),
+  getNotificationPreferences: () => api.get('/api/settings/notifications'),
+  updateNotificationPreferences: (data) => api.put('/api/settings/notifications', data),
 };
 
 export const dashboardAPI = {
-  getStats: () => api.get('/dashboard/stats'),
-  getRecentActivity: () => api.get('/dashboard/activity'),
-  getUpcomingEvents: () => api.get('/dashboard/events'),
-  getDashboard: () => api.get('/dashboard'),
-  getDashboardData: () => api.get('/dashboard'),
+  // Add /api prefix to every API call
+  getStats: () => api.get('/api/dashboard/stats'),
+  getRecentActivity: () => api.get('/api/dashboard/activity'),
+  getUpcomingEvents: () => api.get('/api/dashboard/events'),
+  getDashboard: () => api.get('/api/dashboard'),
+  getDashboardData: () => api.get('/api/dashboard'),
 };
 
 export const adminAPI = {
-  getUsers: () => api.get('/admin/users'),
-  updateUserRole: (userId, role) => api.patch(`/admin/users/${userId}/role`, { role }),
-  deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
-  getUserStats: () => api.get('/admin/user-stats'),
+  // Add /api prefix to every API call
+  getUsers: () => api.get('/api/admin/users'),
+  updateUserRole: (userId, role) => api.patch(`/api/admin/users/${userId}/role`, { role }),
+  deleteUser: (userId) => api.delete(`/api/admin/users/${userId}`),
+  getUserStats: () => api.get('/api/admin/user-stats'),
 };
 
 export const investmentAPI = {
-  getAll: () => api.get('/investments'),
-  getStats: () => api.get('/investments/stats'),
-  getById: (id) => api.get(`/investments/${id}`),
-  create: (data) => api.post('/investments', data),
-  update: (id, data) => api.put(`/investments/${id}`, data),
-  delete: (id) => api.delete(`/investments/${id}`),
-  updateCurrentValue: (id, value) => api.patch(`/investments/${id}/current-value`, { currentValue: value }),
-  getProposals: () => api.get('/investments/proposals'),
-  createProposal: (data) => api.post('/investments/proposals', data),
-  voteOnProposal: (proposalId, vote) => api.post(`/investments/proposals/${proposalId}/vote`, { vote }),
-  getReports: (period) => api.get(`/investments/reports?period=${period}`),
+  // Add /api prefix to every API call
+  getAll: () => api.get('/api/investments'),
+  getStats: () => api.get('/api/investments/stats'),
+  getById: (id) => api.get(`/api/investments/${id}`),
+  create: (data) => api.post('/api/investments', data),
+  update: (id, data) => api.put(`/api/investments/${id}`, data),
+  delete: (id) => api.delete(`/api/investments/${id}`),
+  updateCurrentValue: (id, value) => api.patch(`/api/investments/${id}/current-value`, { currentValue: value }),
+  getProposals: () => api.get('/api/investments/proposals'),
+  createProposal: (data) => api.post('/api/investments/proposals', data),
+  voteOnProposal: (proposalId, vote) => api.post(`/api/investments/proposals/${proposalId}/vote`, { vote }),
+  getReports: (period) => api.get(`/api/investments/reports?period=${period}`),
 };
 
 export const announcementsAPI = {
-  getAll: () => api.get('/announcements'),
-  getById: (id) => api.get(`/announcements/${id}`),
-  create: (data) => api.post('/announcements', data),
-  update: (id, data) => api.put(`/announcements/${id}`, data),
-  delete: (id) => api.delete(`/announcements/${id}`),
-  updateVisibility: (id, data) => api.patch(`/announcements/${id}/visibility`, data),
+  // Add /api prefix to every API call
+  getAll: () => api.get('/api/announcements'),
+  getById: (id) => api.get(`/api/announcements/${id}`),
+  create: (data) => api.post('/api/announcements', data),
+  update: (id, data) => api.put(`/api/announcements/${id}`, data),
+  delete: (id) => api.delete(`/api/announcements/${id}`),
+  updateVisibility: (id, data) => api.patch(`/api/announcements/${id}/visibility`, data),
 };
 
 export const testConnection = async () => {
-  try {
-    const response = await api.get('/health');
-    return { success: true, data: response.data };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+  try {
+    const response = await api.get('/api/health');
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 };
 
 export default api;
