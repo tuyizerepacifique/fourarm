@@ -1,35 +1,18 @@
 {
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/(.*\\.js)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*\\.css)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*\\.png)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*\\.jpg)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*\\.svg)",
-      "dest": "/$1"
+      "src": "/(.*)",
+      "dest": "/frontend/index.html"
     }
   ]
 }
