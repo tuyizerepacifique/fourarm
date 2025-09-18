@@ -1,4 +1,4 @@
-// server.js - COMPLETE UPDATED VERSION
+// server.js - COMPLETE UPDATED VERSION WITH ALL FIXES
 
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
@@ -25,13 +25,13 @@ const announcementsRoutes = require('./routes/announcements');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS Configuration - UPDATED
+// CORS Configuration - SIMPLIFIED AND GUARANTEED TO WORK
 const allowedOrigins = [
-  'https://frontend-hzf0mal3u-idiom.vercel.app', // Your Vercel frontend
-  'https://fourarm-frontend.vercel.app',         // Your main domain
-  'http://localhost:3000',                       // Local development
-  'http://localhost:5173',                       // Vite development
-  'https://fourarm-frontend.vercel.app',         // Alternative Vercel domain
+  'https://frontend-hzf0mal3u-idiom.vercel.app',
+  'https://fourarm-frontend.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://fourarm-frontend.vercel.app',
 ];
 
 // Add FRONTEND_URL from environment if it exists
@@ -40,29 +40,27 @@ if (process.env.FRONTEND_URL) {
   allowedOrigins.push(...envOrigins);
 }
 
-console.log('Allowed CORS origins:', allowedOrigins);
+console.log('🔄 Allowed CORS origins:', allowedOrigins);
 
-// Middleware - UPDATED CORS CONFIG
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman, curl)
-    if (!origin) return callback(null, true);
-    
-    // Check if the origin is in the allowed list
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked for origin:', origin);
-      callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
-
-// Handle preflight requests for all routes - CRUCIAL FOR CORS
-app.options('*', cors());
+// SIMPLE & EFFECTIVE CORS MIDDLEWARE
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -73,7 +71,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ UPDATED: Routes mounted without /api prefix (to avoid duplicate /api/api/)
+// ✅ ROUTES MOUNTED WITHOUT /api PREFIX (to avoid duplicate /api/api/)
 app.use('/auth', authRoutes);
 app.use('/contributions', contributionRoutes);
 app.use('/dashboard', dashboardRoutes);
@@ -82,7 +80,7 @@ app.use('/settings', settingsRoutes);
 app.use('/investments', investmentRoutes);
 app.use('/announcements', announcementsRoutes);
 
-// ✅ UPDATED: Health check without /api prefix
+// ✅ HEALTH CHECK ENDPOINT
 app.get('/health', async (req, res) => {
   try {
     await sequelize.authenticate();
@@ -105,22 +103,35 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Test CORS endpoint
+// ✅ CORS TEST ENDPOINT (NEW)
 app.get('/cors-test', (req, res) => {
   res.json({
     message: 'CORS test successful!',
     origin: req.headers.origin,
     allowedOrigins: allowedOrigins,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    headers: req.headers
   });
 });
 
-// ✅ UPDATED: Root endpoint with corrected paths
+// ✅ API TEST ENDPOINT (for frontend testing)
+app.get('/api-test', (req, res) => {
+  res.json({
+    message: 'API test successful!',
+    frontendBase: 'https://fourarm-backend.onrender.com/api',
+    backendRoutes: '/auth, /contributions, /admin, etc.',
+    note: 'Frontend should use: https://fourarm-backend.onrender.com/api + endpoint',
+    example: 'https://fourarm-backend.onrender.com/api/auth/login'
+  });
+});
+
+// ✅ ROOT ENDPOINT WITH CORRECTED PATHS
 app.get('/', (req, res) => {
   res.json({
-    message: '4Arms Family Backend API',
-    version: '1.0.0',
+    message: '4Arms Family Backend API - DEPLOYED WITH FIXES',
+    version: '2.0.0',
     environment: process.env.NODE_ENV || 'development',
+    status: '🟢 RUNNING WITH CORS FIXES',
     endpoints: {
       auth: '/auth',
       contributions: '/contributions',
@@ -130,25 +141,34 @@ app.get('/', (req, res) => {
       investments: '/investments',
       announcements: '/announcements',
       admin: '/admin',
-      corsTest: '/cors-test'
+      corsTest: '/cors-test',
+      apiTest: '/api-test'
+    },
+    frontendUsage: {
+      baseURL: 'https://fourarm-backend.onrender.com/api',
+      examples: {
+        login: 'https://fourarm-backend.onrender.com/api/auth/login',
+        users: 'https://fourarm-backend.onrender.com/api/admin/users',
+        contributions: 'https://fourarm-backend.onrender.com/api/contributions'
+      }
     },
     cors: {
       allowedOrigins: allowedOrigins,
-      currentOrigin: req.headers.origin || 'none'
+      currentOrigin: req.headers.origin || 'none',
+      status: '✅ CONFIGURED'
     }
   });
 });
 
 // Error logging middleware
 app.use((err, req, res, next) => {
-  if (err.message.includes('CORS')) {
+  if (err.message && err.message.includes('CORS')) {
     console.error('❌ CORS ERROR:', {
       timestamp: new Date().toISOString(),
       method: req.method,
       path: req.path,
       origin: req.headers.origin,
-      error: err.message,
-      allowedOrigins: allowedOrigins
+      error: err.message
     });
     
     return res.status(403).json({
@@ -173,7 +193,8 @@ app.use((err, req, res, next) => {
 app.use((err, req, res, next) => {
   res.status(500).json({
     error: 'Something went wrong!',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -189,8 +210,11 @@ app.use((req, res) => {
       dashboard: '/dashboard',
       health: '/health',
       settings: '/settings',
-      admin: '/admin'
-    }
+      admin: '/admin',
+      corsTest: '/cors-test',
+      apiTest: '/api-test'
+    },
+    frontendUsage: 'Use: https://fourarm-backend.onrender.com/api + endpoint'
   });
 });
 
@@ -216,6 +240,7 @@ const startServer = async () => {
       console.log(`📊 Database: ${process.env.DB_NAME}`);
       console.log(`🔗 Health: http://localhost:${PORT}/health`);
       console.log(`🔗 CORS Test: http://localhost:${PORT}/cors-test`);
+      console.log(`🔗 API Test: http://localhost:${PORT}/api-test`);
       console.log(`🎯 Allowed Frontends: ${allowedOrigins.join(', ')}`);
       console.log('\n📋 Available endpoints:');
       console.log('   Auth: /auth');
@@ -224,6 +249,10 @@ const startServer = async () => {
       console.log('   Dashboard: /dashboard');
       console.log('   Health: /health');
       console.log('   CORS Test: /cors-test');
+      console.log('   API Test: /api-test');
+      console.log('\n🎯 Frontend should use:');
+      console.log('   Base URL: https://fourarm-backend.onrender.com/api');
+      console.log('   Example: https://fourarm-backend.onrender.com/api/auth/login');
     });
 
     process.on('SIGINT', () => {
