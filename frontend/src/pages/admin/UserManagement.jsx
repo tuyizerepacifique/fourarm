@@ -423,13 +423,11 @@ function UserManagement() {
                             {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                           </span>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-gray-900 dark:text-white truncate">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">
                             {user.firstName} {user.lastName}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate" title={user.email}>
-                            {user.email}
-                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                         </div>
                       </div>
                     </td>
